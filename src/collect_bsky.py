@@ -19,16 +19,13 @@ QUERIES = [
     "SWE intern",
     "internship offer",
     "summer internship 2026",
-    "data science internship",
     "tech internship",
     "internship hiring",
     "new grad internship",
     "internship referral",
-    "co-op internship",
 
     # THIS TARGETS SPECIFIC ROLES
     "product manager intern",
-    "PM intern",
     "machine learning intern",
     "ML intern",
     "AI internship",
@@ -51,26 +48,26 @@ QUERIES = [
     "UX intern",
     "design intern",
 
-    #  THIS QUERY TARGETS MOST POPULAR COMPANIES THAT STUDENTS WANT TO INTERN FOR
-    "Google internship",
-    "Meta internship",
-    "Apple internship",
-    "Microsoft internship",
-    "Amazon internship",
-    "Netflix internship",
-    "Nvidia internship",
-    "OpenAI internship",
-    "Spotify internship",
-    "Uber internship",
-    "Airbnb internship",
-    "LinkedIn internship",
-    "Salesforce internship",
-    "Adobe internship",
-    "Intel internship",
-    "Qualcomm internship",
-    "SpaceX internship",
-    "Tesla internship",
-    "Bloomberg internship",
+    # #  THIS QUERY TARGETS MOST POPULAR COMPANIES THAT STUDENTS WANT TO INTERN FOR
+    # "Google internship",
+    # "Meta internship",
+    # "Apple internship",
+    # "Microsoft internship",
+    # "Amazon internship",
+    # "Netflix internship",
+    # "Nvidia internship",
+    # "OpenAI internship",
+    # "Spotify internship",
+    # "Uber internship",
+    # "Airbnb internship",
+    # "LinkedIn internship",
+    # "Salesforce internship",
+    # "Adobe internship",
+    # "Intel internship",
+    # "Qualcomm internship",
+    # "SpaceX internship",
+    # "Tesla internship",
+    # "Bloomberg internship",
 
     #  THIS QUERY TARGETS FOR POPULAR INTERNSHIP LOCATIONS
     "internship San Francisco",
@@ -82,11 +79,7 @@ QUERIES = [
     "remote internship 2026",
     "hybrid internship",
 
-    #  THIS QUERY TARGETS FOR UC AND ANY UNIVERSITY
-    "UCR internship",
-    "UC Riverside internship",
-    "college internship",
-    "university internship",
+    #  THIS QUERY TARGETS FOR CURRENTLY ENROLLED STUDENTS
     "CS student internship",
     "computer science internship",
     "engineering internship",
@@ -95,6 +88,36 @@ QUERIES = [
 MAX_POSTS_PER_QUERY = 1000
 OUTPUT_FILE = Path("data/bluesky_posts.jsonl")
 
+
+def get_comments(client, post_uri:str)->list:
+    try:
+        response = client.app.bsky.feed.get_post_thread({"uri":post_uri})
+        thread = response.thread
+        comments = []
+        
+        def flatten_replies_tree(node):
+            if not hasattr(node, "replies") or not node.replies:
+                return
+            for reply in node.replies:
+                if not hasattr(reply, "post"):
+                    continue
+                reply_text = getattr(reply.post.record, "text", "")
+                if not reply_text:
+                    continue
+                comments.append({
+                    "author": reply.post.author.handle,  
+                    "body":   reply_text,                
+                    "likes":  reply.post.like_count,   
+                })
+                # Here, we apply recursion to go through our nested replies and to flatten the entire comment tree
+                flatten_replies_tree(reply)
+ 
+        flatten_replies_tree(thread)
+        return comments
+ 
+    except Exception as e:
+        print(f"  Could not fetch comments for {post_uri}: {e}")
+        return []
 
 def post_to_dict(post):
     record = post.record
@@ -114,8 +137,7 @@ def post_to_dict(post):
         "indexed_at": post.indexed_at,
         "collected_at": datetime.now(timezone.utc).isoformat(),
     }
-
-
+        
 def main():
     if not HANDLE or not APP_PASSWORD:
         raise ValueError("Missing BSKY_HANDLE or BSKY_APP_PASSWORD in .env file.")
@@ -154,8 +176,14 @@ def main():
                         continue
 
                     seen_uris.add(post.uri)
+                    
+                    comments = [] #this is to store all the comments
+                    if post.reply_count and post.reply_count > 0 :
+                        comments = get_comments(client, post.uri)
+                        #time.sleep(0.5) # DONT REMOVE THIS, WITHOUT THIS, IT MIGHT SKIP COMMENTS AND HIT THE RATE LIMIT
 
                     data = post_to_dict(post)
+                    data["comments"] = comments
                     data["search_query"] = query
 
                     f.write(json.dumps(data, ensure_ascii=False) + "\n")
