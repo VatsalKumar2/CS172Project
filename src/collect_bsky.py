@@ -13,7 +13,7 @@ load_dotenv()
 HANDLE = os.getenv("BSKY_HANDLE")
 APP_PASSWORD = os.getenv("BSKY_APP_PASSWORD")
 
-QUERY = "climate change"
+QUERY = ["climate change", "global warming", "carbon emissions"]
 MAX_POSTS = 300
 OUTPUT_FILE = Path("data/bluesky_posts.jsonl")
 
@@ -47,42 +47,53 @@ def main():
     client = Client()
     client.login(HANDLE, APP_PASSWORD)
 
-    collected = 0
-    cursor = None
+    total_collected = 0
     seen_uris = set()
 
     with OUTPUT_FILE.open("w", encoding="utf-8") as f:
-        while collected < MAX_POSTS:
-            response = client.app.bsky.feed.search_posts(
-                {
-                    "q": QUERY,
-                    "limit": min(100, MAX_POSTS - collected),
-                    "cursor": cursor,
-                }
-            )
+        for query in QUERIES:
+            print(f"\nCollecting posts for query: {query}")
 
-            posts = response.posts
+            collected_for_query = 0
+            cursor = None
 
-            if not posts:
-                break
+            while collected_for_query < MAX_POSTS_PER_QUERY:
+                response = client.app.bsky.feed.search_posts(
+                    {
+                        "q": query,
+                        "limit": min(100, MAX_POSTS_PER_QUERY - collected_for_query),
+                        "cursor": cursor,
+                    }
+                )
 
-            for post in posts:
-                if post.uri in seen_uris:
-                    continue
+                posts = response.posts
 
-                seen_uris.add(post.uri)
-                f.write(json.dumps(post_to_dict(post), ensure_ascii=False) + "\n")
-                collected += 1
+                if not posts:
+                    break
 
-            print(f"Collected {collected} posts")
+                for post in posts:
+                    if post.uri in seen_uris:
+                        continue
 
-            cursor = response.cursor
-            if not cursor:
-                break
+                    seen_uris.add(post.uri)
 
-            time.sleep(1)
+                    data = post_to_dict(post)
+                    data["search_query"] = query
 
-    print(f"Done. Saved {collected} posts to {OUTPUT_FILE}")
+                    f.write(json.dumps(data, ensure_ascii=False) + "\n")
+
+                    collected_for_query += 1
+                    total_collected += 1
+
+                print(f"Collected {collected_for_query} posts for '{query}'")
+
+                cursor = response.cursor
+                if not cursor:
+                    break
+
+                time.sleep(1)
+
+    print(f"\nDone. Saved {total_collected} total posts to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
