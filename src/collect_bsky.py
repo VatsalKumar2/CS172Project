@@ -13,8 +13,8 @@ load_dotenv()
 HANDLE = os.getenv("BSKY_HANDLE")
 APP_PASSWORD = os.getenv("BSKY_APP_PASSWORD")
 
-QUERY = ["climate change", "global warming", "carbon emissions"]
-MAX_POSTS = 300
+QUERIES = ["climate change", "global warming", "carbon emissions"]
+MAX_POSTS_PER_QUERY = 1000
 OUTPUT_FILE = Path("data/bluesky_posts.jsonl")
 
 
