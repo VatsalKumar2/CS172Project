@@ -1,8 +1,11 @@
 import os
 import json
 import time
+import requests
 from datetime import datetime, timezone
 from pathlib import Path
+from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor
 
 from dotenv import load_dotenv
 from atproto import Client
@@ -118,6 +121,36 @@ def get_comments(client, post_uri:str)->list:
     except Exception as e:
         print(f"  Could not fetch comments for {post_uri}: {e}")
         return []
+    
+
+#def get_link(post):
+    #post_links = []
+
+    #post_facets = getattr(post.record, "facets", [])
+    #if post_facets is not None:
+        #for each in post_facets:
+            #features = getattr(each, "features", [])
+            #for values in features:
+                #if hasattr(values, "uri"):
+                    #post_links.append(values.uri)
+    
+    #return post_links
+
+#def get_title(url):
+    #try:
+        #page = requests.get(url, timeout=8)
+        #html = page.content.decode("utf-8", errors="ignore")
+        #soup = BeautifulSoup(html, "lxml")
+        #if soup.title and soup.title.string is not None:
+            #return soup.title.string
+        #return ""
+    #except Exception as e:
+        #print(e)
+        #return None
+    
+#def crawl_link(urls):
+    #with ThreadPoolExecutor(max_workers=5) as exe:
+        #return list(exe.map(get_title, urls))
 
 def post_to_dict(post):
     record = post.record
@@ -182,9 +215,29 @@ def main():
                         comments = get_comments(client, post.uri)
                         #time.sleep(0.5) # DONT REMOVE THIS, WITHOUT THIS, IT MIGHT SKIP COMMENTS AND HIT THE RATE LIMIT
 
+                    #links = []
+                    #for values in get_link(post):
+                        #links.append(values)
+
+                    #if len(links) != 0:
+                        #valid_links = []
+                        #for urls in links:
+                            #if urls and urls.startswith("http"):
+                                #valid_links.append(urls)
+
+                        #if valid_links:
+                            #page_title = crawl_link(valid_links)
+                        #else:
+                            #page_title = []
+
                     data = post_to_dict(post)
                     data["comments"] = comments
                     data["search_query"] = query
+
+                    #if len(links) != 0:
+                        #data["links"] = links
+                        #if len(page_title) != 0:
+                            #data["page_title"] = page_title
 
                     f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
