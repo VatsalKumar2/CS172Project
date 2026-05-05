@@ -40,21 +40,21 @@ cd CS172Project
 ## Step 2: Create a Virtual Environment
 
 ```powershell
-python -m venv venv
+Powershell: python -m venv venv
 ```
 
 ``` macOS
-python3 -m venv venv
+macOS: python3 -m venv venv
 ```
 
 Activate it:
 
 ```powershell
-.\venv\Scripts\Activate.ps1
+Powershell: .\venv\Scripts\Activate.ps1
 ```
 
 ``` macOS
-source venv/bin/activate
+macOS: source venv/bin/activate
 ```
 
 If PowerShell blocks activation, run:
@@ -102,11 +102,11 @@ Do not use your normal Bluesky login password in the code.
 Copy the example file:
 
 ```powershell
-copy .env.example .env
+Powershell: copy .env.example .env
 ```
 
 ``` macOS
-cp .env.example .env
+macOS: cp .env.example .env
 ```
 
 Open `.env` and fill it in:
@@ -128,11 +128,11 @@ Do not commit `.env` to GitHub.
 ## Step 7: Run the Crawler
 
 ```powershell
-python src/collect_bsky.py
+Powershell: python src/collect_bsky.py
 ```
 
 ``` macOS
-python3 src/collect_bsky.py
+macOS: python3 src/collect_bsky.py
 ```
 
 The crawler will:
@@ -179,11 +179,11 @@ Example structure:
 Run:
 
 ```powershell
-python src/verify_jsonl.py
+Powershell: python src/verify_jsonl.py
 ```
 
 ```macos
-python3 src/verify_jsonl.py
+macOS: python3 src/verify_jsonl.py
 ```
 
 If the file is valid, it should print something like:
@@ -202,11 +202,11 @@ Duplicate posts: X
 Run:
 
 ```powershell
-dir data
+Powershell: dir data
 ```
 
 ```macOS
-ls -lh data
+macOS: ls -lh data
 ```
 
 The `Length` column shows the file size in bytes.
@@ -214,11 +214,11 @@ The `Length` column shows the file size in bytes.
 To see the size in MB:
 
 ```powershell
-(Get-Item data\bluesky_posts.jsonl).Length / 1MB
+Powershell: (Get-Item data\bluesky_posts.jsonl).Length / 1MB
 ```
 
 ```macOS
-stat -f%z data/bluesky_posts.jsonl
+macOS: stat -f%z data/bluesky_posts.jsonl
 echo "$(stat -f%z data/bluesky_posts.jsonl) / 1024 / 1024" | bc -l
 ```
 
