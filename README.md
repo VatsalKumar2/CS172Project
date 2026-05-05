@@ -43,10 +43,18 @@ cd CS172Project
 python -m venv venv
 ```
 
+``` macOS
+python3 -m venv venv
+```
+
 Activate it:
 
 ```powershell
 .\venv\Scripts\Activate.ps1
+```
+
+``` macOS
+source venv/bin/activate
 ```
 
 If PowerShell blocks activation, run:
@@ -97,6 +105,10 @@ Copy the example file:
 copy .env.example .env
 ```
 
+``` macOS
+cp .env.example .env
+```
+
 Open `.env` and fill it in:
 
 ```env
@@ -117,6 +129,10 @@ Do not commit `.env` to GitHub.
 
 ```powershell
 python src/collect_bsky.py
+```
+
+``` macOS
+python3 src/collect_bsky.py
 ```
 
 The crawler will:
@@ -166,10 +182,19 @@ Run:
 python src/verify_jsonl.py
 ```
 
+```macos
+python3 src/verify_jsonl.py
+```
+
 If the file is valid, it should print something like:
 
 ```text
-All good. Verified X JSON lines.
+--- Verification Summary ---
+Total lines: X
+Invalid JSON lines: X
+Entries with missing fields: X
+Empty text posts: X
+Duplicate posts: X
 ```
 
 ## Step 10: Check File Size
@@ -180,12 +205,21 @@ Run:
 dir data
 ```
 
+```macOS
+ls -lh data
+```
+
 The `Length` column shows the file size in bytes.
 
 To see the size in MB:
 
 ```powershell
 (Get-Item data\bluesky_posts.jsonl).Length / 1MB
+```
+
+```macOS
+stat -f%z data/bluesky_posts.jsonl
+echo "$(stat -f%z data/bluesky_posts.jsonl) / 1024 / 1024" | bc -l
 ```
 
 ## Configuration
