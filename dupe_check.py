@@ -105,7 +105,7 @@ if __name__ == "__main__":
     kept = 0
     dropped = 0
 
-    with open("bluesky_posts.jsonl", "r", encoding="utf-8") as f:
+    with open("./data/bluesky_posts.jsonl", "r", encoding="utf-8") as f:
         for line in f:
             if not line.strip():
                 continue
