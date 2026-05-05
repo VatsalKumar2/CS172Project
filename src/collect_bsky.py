@@ -1,8 +1,10 @@
 import os
 import json
 import time
+import requests
 from datetime import datetime, timezone
 from pathlib import Path
+from bs4 import BeautifulSoup
 
 from dotenv import load_dotenv
 from atproto import Client
@@ -14,15 +16,11 @@ HANDLE = os.getenv("BSKY_HANDLE")
 APP_PASSWORD = os.getenv("BSKY_APP_PASSWORD")
 
 QUERIES = [
-    # THIS TARGETS GENERAL INTERNSHIPS
+    # THIS TARGETS SWE INTERNSHIPS
     "software internship",
     "SWE intern",
-    "internship offer",
-    "summer internship 2026",
+    "computer science summer internship 2026",
     "tech internship",
-    "internship hiring",
-    "new grad internship",
-    "internship referral",
 
     # THIS TARGETS SPECIFIC ROLES
     "product manager intern",
@@ -48,26 +46,26 @@ QUERIES = [
     "UX intern",
     "design intern",
 
-    # #  THIS QUERY TARGETS MOST POPULAR COMPANIES THAT STUDENTS WANT TO INTERN FOR
-    # "Google internship",
-    # "Meta internship",
-    # "Apple internship",
-    # "Microsoft internship",
-    # "Amazon internship",
-    # "Netflix internship",
-    # "Nvidia internship",
-    # "OpenAI internship",
-    # "Spotify internship",
-    # "Uber internship",
-    # "Airbnb internship",
-    # "LinkedIn internship",
-    # "Salesforce internship",
-    # "Adobe internship",
-    # "Intel internship",
-    # "Qualcomm internship",
-    # "SpaceX internship",
-    # "Tesla internship",
-    # "Bloomberg internship",
+    #  THIS QUERY TARGETS MOST POPULAR COMPANIES THAT STUDENTS WANT TO INTERN FOR
+    "Google internship",
+    "Meta internship",
+    "Apple internship",
+    "Microsoft internship",
+    "Amazon internship",
+    "Netflix internship",
+    "Nvidia internship",
+    "OpenAI internship",
+    "Spotify internship",
+    "Uber internship",
+    "Airbnb internship",
+    "LinkedIn internship",
+    "Salesforce internship",
+    "Adobe internship",
+    "Intel internship",
+    "Qualcomm internship",
+    "SpaceX internship",
+    "Tesla internship",
+    "Bloomberg internship",
 
     #  THIS QUERY TARGETS FOR POPULAR INTERNSHIP LOCATIONS
     "internship San Francisco",
@@ -85,16 +83,23 @@ QUERIES = [
     "engineering internship",
     "STEM internship",
 ]
-MAX_POSTS_PER_QUERY = 1000
+
+MAX_POSTS_PER_QUERY = 5000
 OUTPUT_FILE = Path("data/bluesky_posts.jsonl")
 
-
-def get_comments(client, post_uri:str)->list:
+def get_comments(client, post_uri: str) -> list:
     try:
-        response = client.app.bsky.feed.get_post_thread({"uri":post_uri})
+        response = client.app.bsky.feed.get_post_thread({"uri": post_uri})
         thread = response.thread
         comments = []
-        
+
+        # ADD THIS TO FILTER OUT ANY UNNECESSARY COMMENTS
+        COMMENT_KEYWORDS = [
+            "internship", "intern", "job", "hiring", "offer",
+            "apply", "application", "interview", "salary", "stipend",
+            "remote", "hybrid", "role", "position", "company",
+            "experience", "resume", "referral", "co-op", "new grad"
+        ]
         def flatten_replies_tree(node):
             if not hasattr(node, "replies") or not node.replies:
                 return
@@ -104,40 +109,44 @@ def get_comments(client, post_uri:str)->list:
                 reply_text = getattr(reply.post.record, "text", "")
                 if not reply_text:
                     continue
+                if not any(kw in reply_text.lower() for kw in COMMENT_KEYWORDS):    # If the comment has none of the keywords listed, we skip it
+                    continue
                 comments.append({
-                    "author": reply.post.author.handle,  
-                    "body":   reply_text,                
-                    "likes":  reply.post.like_count,   
+                    "author": reply.post.author.handle,
+                    "body":   reply_text,
+                    "likes":  reply.post.like_count,
                 })
                 # Here, we apply recursion to go through our nested replies and to flatten the entire comment tree
                 flatten_replies_tree(reply)
- 
+
         flatten_replies_tree(thread)
         return comments
- 
+
     except Exception as e:
         print(f"  Could not fetch comments for {post_uri}: {e}")
         return []
+
 
 def post_to_dict(post):
     record = post.record
 
     return {
-        "platform": "bluesky",
-        "uri": post.uri,
-        "cid": post.cid,
-        "author_handle": post.author.handle,
+        "platform":            "bluesky",
+        "uri":                 post.uri,
+        "cid":                 post.cid,
+        "author_handle":       post.author.handle,
         "author_display_name": post.author.display_name,
-        "text": getattr(record, "text", ""),
-        "created_at": getattr(record, "created_at", None),
-        "like_count": post.like_count,
-        "reply_count": post.reply_count,
-        "repost_count": post.repost_count,
-        "quote_count": post.quote_count,
-        "indexed_at": post.indexed_at,
-        "collected_at": datetime.now(timezone.utc).isoformat(),
+        "text":                getattr(record, "text", ""),
+        "created_at":          getattr(record, "created_at", None),
+        "like_count":          post.like_count,
+        "reply_count":         post.reply_count,
+        "repost_count":        post.repost_count,
+        "quote_count":         post.quote_count,
+        "indexed_at":          post.indexed_at,
+        "collected_at":        datetime.now(timezone.utc).isoformat(),
     }
-        
+
+
 def main():
     if not HANDLE or not APP_PASSWORD:
         raise ValueError("Missing BSKY_HANDLE or BSKY_APP_PASSWORD in .env file.")
@@ -176,15 +185,26 @@ def main():
                         continue
 
                     seen_uris.add(post.uri)
-                    
-                    comments = [] #this is to store all the comments
-                    if post.reply_count and post.reply_count > 0 :
+
+
+                    comments = []
+                    if post.reply_count and post.reply_count > 0:
                         comments = get_comments(client, post.uri)
-                        #time.sleep(0.5) # DONT REMOVE THIS, WITHOUT THIS, IT MIGHT SKIP COMMENTS AND HIT THE RATE LIMIT
+                        time.sleep(0.5) # DONT REMOVE THIS, WITHOUT THIS, IT MIGHT SKIP COMMENTS AND HIT THE RATE LIMIT
+
+                    urls = []
+                    if hasattr(post.record, "facets") and post.record.facets:
+                        for facet in post.record.facets:
+                            if hasattr(facet, "features"):
+                                for feature in facet.features:
+                                    if hasattr(feature, "uri"):
+                                        urls.append(feature.uri)
+
+
 
                     data = post_to_dict(post)
-                    data["comments"] = comments
-                    data["search_query"] = query
+                    data["comments"]          = comments
+                    data["search_query"]      = query
 
                     f.write(json.dumps(data, ensure_ascii=False) + "\n")
 
