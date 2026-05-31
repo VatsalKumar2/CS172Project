@@ -362,3 +362,23 @@ ls bsky_index
 ```
 
 The index is now ready for searching with PyLucene.
+
+## Indexed Fields
+
+Searchable fields:
+```
+author_handle
+author_display_name
+text
+link_title
+```
+
+Stored Metadata Fields:
+```
+created_at
+uri
+like_count
+reply_count
+repost_count
+quote_count
+```
