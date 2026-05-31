@@ -294,3 +294,71 @@ This portion of the project handles:
 - Data verification
 
 This script provides the base crawler and storage pipeline for the team’s Part A data collection.
+
+## Part B: Pylucene Indexer & Web Interface
+The Pylucene Indexer requires these files in the main directory:
+```
+indexer.py
+bsky_posts.jsonl
+```
+
+Using the Pylucene Indexer:
+- (Recommended) Login to the CS172 Bolt server using your UCR CS login:
+  - Pylucene is installed on the UCR Bolt server, so it'll make access quicker than installing on your local machine.
+  - Use Ctrl + Shift + P to open the Command Palette
+  - Select 'Remote-SSH: Connect to Host'
+  - SSH into Bolt Account:
+    - ssh netid@bolt.cs.ucr.edu
+  - Type in your Bolt Account Password
+
+## In the Bolt Server:
+Login into the CS172 container to access Pylucene by typing:
+```
+cs172_login
+```
+
+Check that the required files mentioned above exist in the directory:
+```
+bsky_posts.jsonl
+indexer.py
+```
+
+- If they don't then you will need to scp them from your local machine:
+  - First, while ssh'd into the Bolt Server, scp the Bluesky Posts data file and Indexer file into bolt server: 
+  ```
+  netid@bolt $ scp data/bsky_posts.jsonl netid@bolt.cs.ucr.edu:~/
+
+  netid@bolt $ scp indexer.py netid@bolt.cs.ucr.edu:~/
+  ```
+
+  - Second, login to the CS172 container, and scp the Bluesky Posts data file and the Indexer file from Bolt server into the CS172 container:
+  ```
+  netid@bolt $ cs172_login
+  cs172@class-060:~ $ scp netid@bolt.cs.ucr.edu:~/data/bsky_posts.jsonl ~/
+  cs172@class-060:~ $ scp netid@bolt.cs.ucr.edu:~/indexer.py ~/
+  ```
+
+  - Check again that the required files mentioned above exist in the directory:
+  ```
+  bsky_posts.jsonl
+  indexer.py
+  ```
+
+## Run the Indexer
+Use this command to run the indexer:
+```
+python3 indexer.py bsky_posts.jsonl bsky_index
+```
+
+This is what the expected output should look like:
+```
+Indexed 10187 documents.
+Index written to: bsky_index
+```
+
+Verify that all index files are in the bsky_index directory by typing:
+```
+ls bsky_index
+```
+
+The index is now ready for searching with PyLucene.

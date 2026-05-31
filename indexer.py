@@ -72,7 +72,7 @@ writer = IndexWriter(store, config)
 doc_count = 0
 
 with open(
-    input_file
+    input_file,
     "r",
     encoding="utf-8"
 ) as f:
@@ -122,7 +122,7 @@ with open(
             )
 
             quote_count = str(
-                post.get(quote_count) or 0
+                post.get("quote_count") or 0
             )
 
             # Extract webpage titles from links
