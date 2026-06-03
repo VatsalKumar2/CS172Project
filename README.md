@@ -382,3 +382,35 @@ reply_count
 repost_count
 quote_count
 ```
+
+## Using Flask Backend:
+After creating the index, run the following command to your terminal:
+```
+python3 app.py
+```
+Your terminal should display the following:
+```
+ * Serving Flask app 'app'
+ * Debug mode: on
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://169.235.31.65:5000
+Press CTRL+C to quit
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 975-513-288
+```
+Then create a new terminal and login to the cs172 container again. Finally to find something in the index, run the following command in the new terminal:
+```
+curl "http://localhost:5000/search?q=topic"
+```
+You can also search with filters. Here are examples of this
+```
+Get post with based on amount of likes
+curl "http://localhost:5000/search?q=cats&sort=like_count"
+Get top results
+curl "http://localhost:5000/search?q=cats&top_n=20"
+Search by author
+curl "http://localhost:5000/search?q=cats&author=sachikoko.bsky.social"
+```
