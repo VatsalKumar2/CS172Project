@@ -382,3 +382,131 @@ reply_count
 repost_count
 quote_count
 ```
+
+## Enabling and Running the Search Algorithm
+
+The search algorithm uses PyLucene to search the Bluesky index created from `bsky_posts.jsonl`. It returns the top 10 results ranked by a combined score using BM25 relevance and a small social engagement boost.
+
+### 1. SSH into the Bolt server
+If you're not in the server yet, open the terminal and enter this
+```bash
+ssh <yourNetID>@bolt.cs.ucr.edu
+example: ssh jdoe001@bolt.cs.ucr.edu
+```
+
+### 2. Enter the CS172 PyLucene environment
+
+```bash
+cs172_login
+```
+
+After logging in, you should be inside the CS172 container.
+
+### 3. Go to the project directory inside the container
+
+```bash
+cd /home/cs172
+```
+
+Check that the required files exist:
+
+```bash
+ls
+```
+
+You should see:
+
+```bash
+bsky_posts.jsonl
+indexer.py
+search_algo.py
+```
+
+### 4. Build the PyLucene index
+
+Run the indexer on the collected Bluesky JSONL file:
+
+```bash
+python3 indexer.py bsky_posts.jsonl bsky_index
+```
+
+This creates a PyLucene index folder called:
+
+```bash
+bsky_index
+```
+
+You can confirm it was created with:
+
+```bash
+ls bsky_index
+```
+
+### 5. Run the search algorithm
+
+After the index is created, run:
+
+```bash
+python3 search_algo.py bsky_index
+```
+
+The program will prompt:
+
+```bash
+Search query:
+```
+
+Type a search query, for example:
+
+```bash
+software internship
+```
+
+or:
+
+```bash
+remote SWE intern
+```
+
+The algorithm will return the top 10 results ordered by decreasing final score.
+
+### 6. Exit the search program
+
+To stop the search loop, type:
+
+```bash
+exit
+```
+
+or:
+
+```bash
+quit
+```
+
+### Search Algorithm Details
+
+The search algorithm searches the following indexed fields:
+
+```bash
+text
+link_title
+author_handle
+author_display_name
+```
+
+It uses BM25 as the main relevance ranking method. The final ranking score is calculated using:
+
+```bash
+final_score = 0.85 * BM25_relevance_score + 0.15 * social_score
+```
+
+The social score is based on Bluesky engagement fields:
+
+```bash
+like_count
+reply_count
+repost_count
+quote_count
+```
+
