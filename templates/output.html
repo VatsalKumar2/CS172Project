@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+    <body style="background-color:rgb(167, 190, 212);
+                font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+                align-items: center;
+                justify-content: center;
+                display: flex;">
+        
+        <div style="display: flex;
+                    flex-direction: column;
+                    width: 900px;
+                    min-height: 700px;
+                    margin-top: 40px;
+                    align-items: center;">
+
+            <!-- Encase in a for loop-->
+            {% for item in lucene_output %}
+            <div style="width: 900px; 
+                        min-height: 130px;
+                        background-color: white;
+                        border-radius: 20px;
+                        margin-bottom: 20px;">
+
+                <div style="width: 900px;
+                            height: 50px;
+                            display: flex;
+                            margin-top: 8px;
+                            justify-content: space-around;">
+                    <p><b>Author: </b>{{item['author_display_name'] or 'N/A'}}</p>
+                    <p><b>Date: </b>{{item['created_at'][:10]}}</p>
+                    <p><b>Likes: </b>{{item['like_count']}}</p>
+                    <p><b>Score: </b>{{item['final_score'] | round(2)}}</p>
+                </div>
+
+                <div style="padding: 10px 20px;">
+                    <p><b>Text: </b>{{item['text']}}</p>
+                </div>
+
+            </div>
+            {% endfor %}
+            <!---->
+
+            <form action="/" method="POST">
+                <button type="submit"
+                        style="border-radius: 10px;
+                        margin-top: 20px;
+                        width: 120px;">
+                    Search Again
+                </button>
+            </form>
+
+        </div>
+                
+    </body>
+</html>

@@ -2,7 +2,6 @@ import sys
 import math
 import lucene
 
-lucene.initVM(vmargs=["-Djava.awt.headless=true"])
 
 from java.nio.file import Paths
 from org.apache.lucene.store import SimpleFSDirectory
