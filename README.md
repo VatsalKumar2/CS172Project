@@ -509,7 +509,7 @@ reply_count
 repost_count
 quote_count
 ```
-### 7. Running the full web application
+## Running the full web application
 
 If flask is not already installed, run this:
 
