@@ -538,11 +538,9 @@ After the indexer has been created, run this:
 ```bash
 python3 app.py ./bsky_index
 ```
-Once this command has been executed, a notification will popup asking if you would like to open the app on a browser.
-Click open, but if there are no popup notification, copying and pasting the http link provided in terminal containing your IP address
-and the port number 8080 will also work. For example, the terminal will output this:
+Once this command has been executed, a notification will popup asking if you would like to open the app on a browser. Click open. If there is no popup notification, copy and paste the http link provided in the terminal containing your IP address and the port number 8080 will also work. For example, the terminal will output this:
+
 ```bash
 Running on http://XXX.XXX.XX.XX:8080
 ```
-Copy and paste http link in a browser to see web app. 
-If web app is not working and keeps on loading, campus vpn might be needed in order to help with network connection.
+Copy and paste http link in a browser to open the web app. If the web app is not working and keeps on loading, enable UCR’s campus VPN to help with network connection.
