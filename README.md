@@ -542,7 +542,7 @@ Once this command has been executed, a notification will popup asking if you wou
 Click open, but if there are no popup notification, copying and pasting the http link provided in terminal containing your IP address
 and the port number 8080 will also work. For example, the terminal will output this:
 ```bash
-Running on http://169.235.31.65:8080
+Running on http://XXX.XXX.XX.XX:8080
 ```
 Copy and paste http link in a browser to see web app. 
 If web app is not working and keeps on loading, campus vpn might be needed in order to help with network connection.
