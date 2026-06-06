@@ -12,15 +12,27 @@ Each line in the output file is one JSON object representing one post.
 
 ```text
 CS172Project/
+├── bsky_index/
+│   ├── _0.cfe
+│   └── _0.cfs
+│   └── _0.si
+│   └── segments_1
+│   └── write.lock
 ├── src/
 │   ├── collect_bsky.py
+│   └── test_comment_crawler.py
 │   └── verify_jsonl.py
-├── data/
-│   └── bluesky_posts.jsonl
+├── templates/
+│   ├── input.html
+│   └── output.html
 ├── .env.example
 ├── .gitignore
+├── README.md
+├── bsky_posts.jsonl
+├── dupe_check.py
+├── indexer.py
 ├── requirements.txt
-└── README.md
+└── search_algo.py
 ```
 
 ## Requirements
